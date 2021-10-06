@@ -1,8 +1,9 @@
 import requests
 from bs4 import BeautifulSoup as bs
 from stock_class import stock_info
+import tkinter as tk
 
-
+# function loads webpage for scraping if ticker can be found
 def load_webpage(symbol):
     # uses symbol input to request a yahoo page of ticker symbol
     r = requests.get('https://finance.yahoo.com/quote/' + symbol + '?p=' + symbol + '&.tsrc=fin-srch')
@@ -13,7 +14,7 @@ def load_webpage(symbol):
     # will store boolean depending on in the body element has the string under
     is_there_404 = "Our engineers are working quickly to resolve the issue." in body.get_text()
     if is_there_404:
-        print('Ticker symbol not found. Please enter a valid ticker symbol.')
+        return False
     else:
         return webpage
 
@@ -42,28 +43,64 @@ def find_stock_info(webpage):
     
     return company_name.get_text(), stock_close.get_text(), all_stats
 
-def main():
-    # asks user for ticker symbol
-    symbol = input('Enter ticker symbol: ').strip().upper()
-    print()
+# function will check status of webpage and return a formatted string if available
+def main(symbol):
     webpage = load_webpage(symbol)
-    company_name, close_price, all_stats = find_stock_info(webpage)
+    # str will be return based on if an actual webpage was returned
+    if not webpage:
+        final_str = 'Ticker Symbol Not Found'
+    else:
+        # gets all needed information from webpage and stores it into a stock class instance
+        company_name, close_price, all_stats = find_stock_info(webpage)
+        # uses stock_class.py to create a stock class and gets all info and returns it into a variable
+        company = stock_info(close_price, all_stats[0],all_stats[6],all_stats[4])
+        close_price = company.get_close()
+        previous_close = company.get_previous_close()
+        market_cap = company.get_market_cap()
+        volume = company.get_volume()
 
-    # uses stock_class.py to create a stock class and gets all info and returns it into a variable
-    company = stock_info(close_price, all_stats[0],all_stats[6],all_stats[4])
-    close_price = company.get_close()
-    previous_close = company.get_previous_close()
-    market_cap = company.get_market_cap()
-    volume = company.get_volume()
+        # formats each description into a str to pass onto the GUI label
+        final_str = "%s\nClose: %s\nPrevious Close: %s\nMarket Cap: %s\nVolume: %s" % (company_name,
+                                                                                    close_price,
+                                                                                    previous_close,
+                                                                                    market_cap,
+                                                                                    volume)
+    return final_str
 
-    # prints the stock's stats
-    print('Company: ' + company_name)
-    print('--------------------------------------')
-    print('Close Price: ' + close_price + '\n' +
-          'Previous Close: ' + previous_close + '\n' +
-          'Market Cap: ' + market_cap + '\n' +
-          'Volume: ' + volume)
-    print()
+# function gets symbol from GUI Entry and sends it over to main part of program
+# to get stock description
+def search_symbol():
+    symbol = ticker_entry.get().strip().upper()
+    final_desc = main(symbol)
+    stock_text["text"] = f'{final_desc}'
 
-main()
 
+# activate GUI window
+window = tk.Tk()
+
+# set window title
+window.title('Stock Info')
+
+# create a frame to hold ticker entry and button
+ticker_frame = tk.Frame(master=window, relief=tk.FLAT, borderwidth=3)
+ticker_frame.pack()
+
+# creates the label, entry box, and search button for the ticker symbol
+ticker_label = tk.Label(master=ticker_frame, text='Enter ticker symbol: ')
+ticker_label.grid(row=0, column=0, sticky='e')
+ticker_entry = tk.Entry(master=ticker_frame, width=50)
+ticker_entry.grid(row=0, column=1)
+search_button = tk.Button(master=ticker_frame, text='Search', command=search_symbol)
+search_button.grid(row=0, column=2)
+
+# creates a second frame for the stock info after pressing the search button
+info_frame = tk.Frame(master=window, relief=tk.FLAT, )
+info_frame.pack()
+
+# creates text box that will show the stock info
+stock_text = tk.Label(master=info_frame, text='No Stock Information Yet')
+stock_text.grid(row=0, column=0)
+
+
+# starts application
+window.mainloop()
