@@ -86,7 +86,7 @@ ticker_frame = tk.Frame(master=window, relief=tk.FLAT, borderwidth=3)
 ticker_frame.pack()
 
 # creates the label, entry box, and search button for the ticker symbol
-ticker_label = tk.Label(master=ticker_frame, text='Enter ticker symbol: ')
+ticker_label = tk.Label(master=ticker_frame, text='Enter ticker symbol: ', font=('TkDefaultFont',16))
 ticker_label.grid(row=0, column=0, sticky='e')
 ticker_entry = tk.Entry(master=ticker_frame, width=50)
 ticker_entry.grid(row=0, column=1)
@@ -98,7 +98,7 @@ info_frame = tk.Frame(master=window, relief=tk.FLAT, )
 info_frame.pack()
 
 # creates text box that will show the stock info
-stock_text = tk.Label(master=info_frame, text='No Stock Information Yet')
+stock_text = tk.Label(master=info_frame, text='No Stock Information Yet', font=('TkDefaultFont',18))
 stock_text.grid(row=0, column=0)
 
 
