@@ -1,4 +1,4 @@
-# Stock Price Tracker
+# Stock Info Display
 
 ### Program will use TKinter GUI to display the prices, volume, market cap, and more via webscraping with Python
 
